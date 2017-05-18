@@ -23,7 +23,11 @@ module Kaminari
         # @params in Rails 5 no longer inherits from Hash
         @params = @params.to_unsafe_h if @params.respond_to?(:to_unsafe_h)
         @params = @params.with_indifferent_access
-        @params.except!(*PARAM_KEY_BLACKLIST)
+        if params_whitelist
+          @params.select!{ |param| param.in?(params_whitelist) }
+        else
+          @params.except!(*PARAM_KEY_BLACKLIST)
+        end
         @params.merge! params
       end
 
@@ -66,6 +70,10 @@ module Kaminari
          @theme,
          self.class.name.demodulize.underscore
         ].compact.join("/")
+      end
+
+      def params_whitelist
+        @params_whitelist = Kaminari.config.params_whitelist
       end
     end
 
